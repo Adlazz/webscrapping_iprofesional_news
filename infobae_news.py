@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
+import os
 
 def clean_text(text):
     # Elimina espacios extra y saltos de línea
@@ -12,6 +13,10 @@ def clean_text(text):
 
 def extract_and_save_news(url, output_file=None):
     try:
+        # Crear carpeta Extracts si no existe
+        extracts_folder = "Extracts"
+        os.makedirs(extracts_folder, exist_ok=True)
+        
         result = extract_news_content(url)
         
         if not output_file:
@@ -19,7 +24,10 @@ def extract_and_save_news(url, output_file=None):
             safe_title = re.sub(r'[^a-zA-Z0-9]', '_', result['title'][:50])
             output_file = f"{safe_title}_{datetime.now().strftime('%Y%m%d')}.txt"
         
-        with open(output_file, 'w', encoding='utf-8') as f:
+        # Añadir la ruta de la carpeta Extracts al nombre del archivo
+        output_path = os.path.join(extracts_folder, output_file)
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
             # Escribir título
             f.write(f"TÍTULO:\n{result['title']}\n\n")
             
@@ -38,8 +46,8 @@ def extract_and_save_news(url, output_file=None):
             f.write(f"\n---\nFuente: {url}\n")
             f.write(f"Fecha de extracción: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             
-        print(f"Noticia guardada en: {output_file}")
-        return output_file
+        print(f"Noticia guardada en: {output_path}")
+        return output_path
         
     except Exception as e:
         print(f"Error al guardar la noticia: {str(e)}")
